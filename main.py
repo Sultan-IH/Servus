@@ -40,3 +40,5 @@ def home_route():
 def register_service():
     # adds to the automatic service checkup routine
     return "registered"
+def add_node_server():
+    return
