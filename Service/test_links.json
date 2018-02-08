@@ -1,7 +1,7 @@
 {
-  "wired.com": 1,
-  "hackernoon.com": 2,
-  "news.com": 7,
+  "wired.com": 10,
+  "hackernoon.com": 10,
+  "news.com": 10,
   "something.net":30,
   "/r/bitcoin": 120,
   "/r/crypto": 240,

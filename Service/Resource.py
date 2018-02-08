@@ -4,9 +4,17 @@ import requests
 from typing import Union, List, Tuple
 from Service.Service import Node
 
+"""
+TODOS: 
+    - deallocate_resources: test 
+    - 
+
+"""
+
 
 class Resource:
     collection = []  # collection of tuples; resources to be mined.
+    nodes = {}
 
     def __init__(self, file: str = None, sjson: str = None, link: str = None):
         if file:
@@ -20,6 +28,8 @@ class Resource:
 
     def allocate_resources(self, node: Node):
         arr, remainder = self.find_sum_from_array(node.compute_power)
+        if self.nodes[node.id] is not None:
+            raise RuntimeError("Duplicate node")
         resources = []
         for i in arr[:-1]:
             resources.append(self.collection[i][:])
@@ -28,7 +38,19 @@ class Resource:
             last_r[1] += remainder
         resources.append(last_r)
         self.adjust_resources(arr, remainder)
+        self.nodes[node.id] = resources
         return resources
+
+    def deallocate_resources(self, node: Node):  # just have to have a node id
+        if self.nodes[node.id] is None:
+            raise RuntimeError("No node found in resource registry")
+        resources = self.nodes[node.id]
+        for elm in resources:
+            for item in self.collection:
+                if elm[0] == item[0]:
+                    item[1] += elm[1]
+
+        self.nodes[node.id] = None
 
     def adjust_resources(self, indexes, remainder):
         for i in indexes[:-1]:

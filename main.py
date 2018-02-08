@@ -1,33 +1,10 @@
-from flask import Flask, request, Response
-from functools import wraps
+from flask import Flask, request, Response, jsonify
+import requests
 
 app = Flask(__name__)
 
-
-def check_auth(username, password):
-    """This function is called to check if a username /
-    password combination is valid.
-    """
-    return username == 'admin' and password == 'secret'
-
-
-def authenticate():
-    """Sends a 401 response that enables basic auth"""
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-
-    return decorated
+# this will have a map of all the SERVICES and ports
+registry = {}
 
 
 @app.route('/')
@@ -35,10 +12,42 @@ def home_route():
     return "Hello world!"
 
 
+@app.route('/registry')
+def registry_route():
+    return jsonify(registry)
+
+
 @app.route('/new_service')
-@requires_auth
-def register_service():
-    # adds to the automatic service checkup routine
-    return "registered"
-def add_node_server():
-    return
+def new_service():
+    name = request.headers.get('service_name')
+    port = request.headers.get('service_port')
+    res = Response()
+    if name == "" or name is None or port is None:
+        res.status_code = 300
+        return res
+    registry[name] = int(port)
+    res.status_code = 200
+    return res
+
+
+@app.route('/new_node')
+def new_node():
+    name = request.headers.get('node_name')
+    power = request.headers.get('node_compute_power')
+    service = request.headers.get('service_name')
+    port = registry[service]
+
+    if port is None:
+        res = Response()
+        res.status_code = 300
+        return res
+    headers = {
+        "node_name": name,
+        "node_compute_power": power
+    }
+    r = requests.get("http://localhost:" + str(port), headers=headers)
+
+    return jsonify(r.json())
+
+
+app.run(port=4444)
