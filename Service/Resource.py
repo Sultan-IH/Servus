@@ -4,19 +4,13 @@ import requests
 from typing import Union, List, Tuple
 from Service.Service import Node
 
-"""
-TODOS: 
-    - deallocate_resources: test 
-    - 
-
-"""
-
 
 class Resource:
-    collection = []  # collection of tuples; resources to be mined.
+    collection = []  # resources to be mined.
     nodes = {}
 
-    def __init__(self, file: str = None, sjson: str = None, link: str = None):
+    def __init__(self, name: str, file: str = None, sjson: str = None, link: str = None):
+        self.name = name
         if file:
             with open(file, "r") as f:
                 self.parse_json(f.read())
@@ -26,42 +20,46 @@ class Resource:
             r = requests.get(link)
             self.collection = r.json()
 
-    def allocate_resources(self, node: Node):
-        arr, remainder = self.find_sum_from_array(node.compute_power)
-        if self.nodes[node.id] is not None:
-            raise RuntimeError("Duplicate node")
-        resources = []
-        for i in arr[:-1]:
-            resources.append(self.collection[i][:])
-        last_r = self.collection[arr[-1]][:]
-        if remainder < 0:
-            last_r[1] += remainder
-        resources.append(last_r)
-        self.adjust_resources(arr, remainder)
-        self.nodes[node.id] = resources
+    def new_node(self, node: Node):
+        n = node.resources[self.name]
+        resources = self.allocate_resources(n)
+        # should store indexes of resources
+        if node.id in self.nodes:
+            self.nodes[node.id] += resources
+        else:
+            self.nodes[node.id] = resources
+        resources = [r["name"] for r in resources]
         return resources
 
-    def deallocate_resources(self, node: Node):  # just have to have a node id
-        if self.nodes[node.id] is None:
-            raise RuntimeError("No node found in resource registry")
+    def remove_node(self, node: Node):
         resources = self.nodes[node.id]
-        for elm in resources:
-            for item in self.collection:
-                if elm[0] == item[0]:
-                    item[1] += elm[1]
+        for r in resources:
+            i = self.collection.index(r)
+            self.collection[i]["mined"] -= 1
+        self.nodes[node.id] = []
 
-        self.nodes[node.id] = None
+    def allocate_resources(self, n: int):  # always allocates n least mined resources
+        resources = []
+        for i in range(n):
+            resources.append(self.collection[i])
+            self.collection[i]["mined"] += 1
+        self.collection.sort(key=lambda x: x["mined"])
+        return resources
 
-    def adjust_resources(self, indexes, remainder):
-        for i in indexes[:-1]:
-            self.collection[i][1] = 0
-        i = indexes[-1]
+    def parse_json(self, s: str):
+        resources = json.loads(s)
+        for item in resources:
+            d = {
+                "name": item,
+                "mined": 0,
+            }
+            self.collection.append(d)
 
-        if remainder < 0:
-            self.collection[i][1] = -remainder  # what if its positive
-        else:
-            self.collection[i][1] = 0
-        self.collection.sort(key=lambda x: x[1])
+        self.collection.sort(key=lambda x: x["mined"])
+
+
+"""
+IN MEMORY OF THE USELESS ALGORITHM I WROTE:
 
     def find_sum_from_array(self, x) -> Tuple[List, Union[int, any]]:
         arr = [x[1] for x in self.collection]
@@ -100,9 +98,4 @@ class Resource:
 
             # print("Iter finished", arr, s)
         return elms, current_error
-
-    def parse_json(self, s: str):
-        d = json.loads(s)
-        c = [list(t) for t in d.items()]
-        self.collection = self.collection + c
-        self.collection.sort(key=lambda x: x[1])
+"""

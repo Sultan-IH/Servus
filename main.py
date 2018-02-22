@@ -6,8 +6,17 @@ app = Flask(__name__)
 # this will have a map of all the SERVICES and ports
 registry = {}
 
+"""
+NOTES:
+    - don't forget to run it with the compiler that the IDE has
+TODOS:
+    - remove service route
+    - remove node api
+    - improve documentation
+"""
 
-@app.route('/')
+
+@app.route('/')  # test route
 def home_route():
     return "Hello world!"
 
@@ -33,8 +42,10 @@ def new_service():
 @app.route('/new_node')
 def new_node():
     name = request.headers.get('node_name')
-    power = request.headers.get('node_compute_power')
+    rs = request.headers.get('resources')
+    ns = request.headers.get('how_many')
     service = request.headers.get('service_name')
+
     port = registry[service]
 
     if port is None:
@@ -43,9 +54,10 @@ def new_node():
         return res
     headers = {
         "node_name": name,
-        "node_compute_power": power
+        "resources": rs,
+        "how_many": ns
     }
-    r = requests.get("http://localhost:" + str(port), headers=headers)
+    r = requests.get("http://localhost:" + str(port)+"/new_node", headers=headers)
 
     return jsonify(r.json())
 
