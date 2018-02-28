@@ -2,8 +2,8 @@ import smtplib
 import os
 from Service.Collection import Error
 
-USERNAME = 'ksula0155@gmail.com'  # os.getenv("EMAIL_USERNAME")
-PASSWORD = 'Gmail123Darkside'  # os.getenv("EMAIL_PASSWORD")
+USERNAME = os.getenv("EMAIL_USERNAME")
+PASSWORD = os.getenv("EMAIL_PASSWORD")
 FROMADDR = "reports@servus.io"
 
 if USERNAME is None or PASSWORD is None:
