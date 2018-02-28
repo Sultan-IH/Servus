@@ -1,59 +1,51 @@
-import requests
-import json
-from flask import jsonify, Flask, Response, request
+from flask_graphql import GraphQLView
+from Service.Collection import Collection, Node
+from flask import jsonify, Flask
+import graphene
 
 
-class Node:
-    def __init__(self, _id, resources):  # resources = [{resource:reddit, n: 2}]
-        self.id = _id
-        self.resources = resources
+class Service(graphene.ObjectType):
+    name = graphene.NonNull(graphene.String)
+    collections = graphene.List(Collection)
+    node_registry = graphene.List(Node)
 
+    def new_node(self, n: Node):
+        self.node_registry.append(n)
 
-class Service:
-    resources = []
+    def add_resources(self, name, new_resources):
+        collection = self.find_collection(name)
+        collection.add_resources(new_resources)
 
-    def __init__(self, resources, name, port, host="localhost"):
-        self.resources += resources
-        self.name = name
-        self.port = port
-        self.host = host
+    def remove_resources(self, name, new_resources):
+        collection = self.find_collection(name)
+        new_resources = collection.remove_resources(new_resources)
+        return new_resources
 
-    def new_node(self):
-        name = request.headers.get('node_name')
-        rs = json.loads(request.headers.get('resources'))
-        ns = json.loads(request.headers.get('how_many'))
-        resources = {rs[i]: ns[i] for i in range(len(rs))}
-        n = Node(name, resources)
+    def find_collection(self, name):
+        collection = next((x for x in self.collections if x.name == name), None)
+        return collection
 
-        alloc = self.allocate_resources(n)
-        return jsonify(alloc)
+    def alloc_resources(self, id: str, resource: str, n: int):
+        res = self.find_collection(resource)
+        node = self.find_node(id)
+        if node is None:
+            print("hasnt been registered with a proper request")
+            return []
+        resources = res.allocate_resources(n)
+        return resources
 
-    def allocate_resources(self, n: Node):
-        alloc = {}
-        for k, i in n.resources.items():
-            res = next((x for x in self.resources if x.name == k), None)
-            resources = res.new_node(n)
-            alloc[k] = resources
-        return alloc
+    def find_node(self, id):
+        node = next((x for x in self.node_registry if x.id == id), None)
+        return node
 
-    def remove_node(self, node: Node):
-        self.resource.deallocate_resources(node)
-        res = Response()
-        res.status_code = 200
-        return res
+    def remove_node(self, _id):
+        self.node_registry = [node for node in self.node_registry if node.id != _id]
 
-    def run(self):  # app has to be provided
-        headers = {
-            "service_name": self.name,
-            "service_port": str(self.port),
-            "service_host": self.host
-
-        }
-        r = requests.get("http://localhost:4444/new_service", headers=headers)
-
-        assert r.status_code == 200
+    def run(self, schema, port):
         app = Flask('service_' + self.name)
-        app.add_url_rule('/new_node', 'new_node', self.new_node)
-        app.add_url_rule('/remove_node', 'remove_node', self.remove_node)
+        app.add_url_rule("/graphql", view_func=GraphQLView.as_view(
+            'graphql',
+            schema=schema
+        ))
 
-        app.run(port=self.port)
+        app.run(port=port)

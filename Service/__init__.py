@@ -1,2 +1,2 @@
 from Service.Service import Node, Service
-from Service.Resource import Resource
+from Service.Collection import Collection, Resource

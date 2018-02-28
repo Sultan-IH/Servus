@@ -1,0 +1,16 @@
+schema {
+    query: Query
+    mutation:Mutation
+}
+
+type Query {
+    getResources(first: Int!, Collection: String!, id: String!): [Resource!]
+}
+
+type Mutation {
+    addResources()
+    removeResource()
+    addNode()
+    RemoveNode()
+
+}

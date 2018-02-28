@@ -1,19 +1,9 @@
-FROM ubuntu:16.04
+FROM python:3
 
-MAINTAINER Sultan Kenjeyev "ksula0155@gmail.com"
 
-RUN apt-get update -y && \
-    apt-get install -y python-pip python-dev
+COPY requirements.txt /servus/
+RUN pip install --no-cache-dir -r /servus/requirements.txt
 
-# We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
-
-WORKDIR /app
-
-RUN pip install -r requirements.txt
-
-COPY . /app
-
-ENTRYPOINT [ "python" ]
-
-CMD [ "main.py" ]
+COPY . /servus
+WORKDIR /servus
+CMD [ "python", "SERVICES/Scraping/main.py" ]

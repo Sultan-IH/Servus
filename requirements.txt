@@ -1,2 +1,4 @@
-Flask
-requests
+flask
+flask_graphql
+simplejson
+graphene

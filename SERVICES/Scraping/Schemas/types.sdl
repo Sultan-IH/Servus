@@ -1,0 +1,16 @@
+type Resource {
+    mined: Int!
+    name: String!
+}
+type Collection {
+    nodes: [Node!]
+    resources:[Resource!]
+}
+type Node {
+    name:String!
+    mining:[Resources!]
+}
+type Service {
+    name:String!
+    collections: [Collection!]
+}

@@ -1,0 +1,7 @@
+venv
+scripts
+.vscode
+.ipynb_checkpoints
+*.pem
+docker
+__pycache__
