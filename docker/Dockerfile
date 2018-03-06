@@ -6,4 +6,5 @@ RUN pip install --no-cache-dir -r /servus/requirements.txt
 
 COPY . /servus
 WORKDIR /servus
-CMD [ "python", "SERVICES/Scraping/main.py" ]
+EXPOSE 4555
+CMD [ "python","-m","Scraping.main.py" ]

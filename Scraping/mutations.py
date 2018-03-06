@@ -1,8 +1,8 @@
 from Service.Service import Node
 from Service.Collection import Error
 import graphene
-from SERVICES.Scraping.service import scraping_service
-from SERVICES.Scraping.mailing import send_email
+from .service import scraping_service
+from .mailing import send_email
 
 
 class NewNode(graphene.Mutation):

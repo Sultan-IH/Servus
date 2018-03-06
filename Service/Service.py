@@ -1,13 +1,42 @@
 from flask_graphql import GraphQLView
-from Service.Collection import Collection, Node
+from Service.Collection import Collection, Node, Resource
 from flask import jsonify, Flask
 import graphene
+import os.path as path
+import simplejson
+import atexit
 
 
 class Service(graphene.ObjectType):
     name = graphene.NonNull(graphene.String)
     collections = graphene.List(Collection)
     node_registry = graphene.List(Node)
+
+    def __init__(self, name, collections=[], node_registry=[]):
+        # resurrect
+        if path.isfile(name + ".db"):
+            print("Found old state, resurrecting...")
+            with open(name + ".db", "r") as f:
+                state = simplejson.load(f)
+            collection_names = [collection.name for collection in collections]
+            print("resurrecting from state: ", state)
+            for collection in state['collections']:
+                # check if the collection has been passed in already
+
+                resources = []
+                for resource in collection['resources']:
+                    r = Resource(mined=0, name=resource['name'])
+                    resources.append(r)
+                c = Collection(name=collection["name"], resources=resources)
+
+                if collection['name'] in collection_names:
+                    # find the index and replace
+                    index = collection_names.index(collection["name"])
+                    collections[index] = c
+                else:
+                    collections.append(c)
+
+        super().__init__(name=name, collections=collections, node_registry=node_registry)
 
     def new_node(self, n: Node):
         self.node_registry.append(n)
@@ -41,11 +70,23 @@ class Service(graphene.ObjectType):
     def remove_node(self, _id):
         self.node_registry = [node for node in self.node_registry if node.id != _id]
 
+    def save(self, ):
+        print("saving current state")
+        state = {}
+        with open(self.name + '.db', 'w') as file:
+            state['collections'] = []
+            for c in self.collections:
+                resources = [{'name': r.name, 'mined': r.mined} for r in c.resources]
+                state['collections'].append({'name': c.name, 'resources': resources})
+            print(state)
+            simplejson.dump(state, file)
+
     def run(self, schema, port):
+        atexit.register(self.save)
         app = Flask('service_' + self.name)
         app.add_url_rule("/graphql", view_func=GraphQLView.as_view(
             'graphql',
             schema=schema
         ))
 
-        app.run(port=port)
+        app.run(port=port, host='0.0.0.0')

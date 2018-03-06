@@ -21,6 +21,7 @@ class Error(graphene.ObjectType):
             node id: {self.node_id}
         """
         return s
+    
 
 
 class Node(graphene.ObjectType):

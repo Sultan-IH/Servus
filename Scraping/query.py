@@ -1,5 +1,5 @@
 import graphene
-from SERVICES.Scraping.service import scraping_service
+from .service import scraping_service
 from Service.Collection import Resource, Node
 
 

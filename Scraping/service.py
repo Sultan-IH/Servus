@@ -1,4 +1,4 @@
-from Service.Service import Service
+from Service import Service
 from Service.Collection import Collection
 
 subreddits = Collection(name="subreddits",  resources=[])

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker run -p 4555:4555 -i ksula0155/servus:latest
+docker run --env-file ./Scraping/email.env -i  -p 4555:4555 ksula0155/servus:latest
