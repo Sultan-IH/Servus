@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-
-docker push ksula0155/servus:latest
+version=$(grep "version:" config.yaml | cut -c 10-)
+echo "Building version number: " $version
+docker push ksula0155/servus:$version

@@ -9,23 +9,23 @@ FROMADDR = "reports@servus.io"
 if USERNAME is None or PASSWORD is None:
     print("INVALID USER NAME AND PASSWORD FOR EMAIL")
 
-try:
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-
-    server.starttls()
-    server.login(USERNAME, PASSWORD)
-except:
-    print("mailing module, something went wrong")
-
 
 def send_email(to_addr: str, subject: str, error: Error):
-    msg = "\r\n".join([
-        "From: " + FROMADDR,
-        "To: " + to_addr,
-        "Subject: " + subject,
-        "",
-        str(error)
-    ])
-    print(msg)
-    server.sendmail(FROMADDR, to_addr, msg)
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        try:
+            server.ehlo()
+
+            server.starttls()
+            server.login(USERNAME, PASSWORD)
+        except:
+            return print("mailing module, something went wrong")
+
+        msg = "\r\n".join([
+            "From: " + FROMADDR,
+            "To: " + to_addr,
+            "Subject: " + subject,
+            "",
+            str(error)
+        ])
+        print(msg)
+        server.sendmail(FROMADDR, to_addr, msg)

@@ -14,9 +14,10 @@ class Service(graphene.ObjectType):
 
     def __init__(self, name, collections=[], node_registry=[]):
         # resurrect
-        if path.isfile(name + ".db"):
+        self.db_path = "./dbs/" + name + ".db"
+        if path.isfile(self.db_path):
             print("Found old state, resurrecting...")
-            with open(name + ".db", "r") as f:
+            with open(self.db_path, "r") as f:
                 state = simplejson.load(f)
             collection_names = [collection.name for collection in collections]
             print("resurrecting from state: ", state)
@@ -73,7 +74,7 @@ class Service(graphene.ObjectType):
     def save(self, ):
         print("saving current state")
         state = {}
-        with open(self.name + '.db', 'w') as file:
+        with open(self.db_path, 'w') as file:
             state['collections'] = []
             for c in self.collections:
                 resources = [{'name': r.name, 'mined': r.mined} for r in c.resources]

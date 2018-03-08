@@ -36,6 +36,7 @@ class NewError(graphene.Mutation):
         else:
             node.add_error(error)
             send_email("ksula0155@gmail.com", "Error in Scraping", error)
+            send_email("vincnttan@gmail.com", "Error in Scraping", error)
             return NewError(ok=True)
 
 
