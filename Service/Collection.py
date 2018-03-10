@@ -11,17 +11,18 @@ class Resource(graphene.ObjectType):
 class Error(graphene.ObjectType):
     error_message = graphene.String()
     date = graphene.String()
-    node_id = graphene.String()
+    node = Node
 
     def __str__(self):
         s = f"""
         Error report:
             message: {self.error_message}
             date: {self.date}
-            node id: {self.node_id}
+            Node:
+                id: {self.node.id}
+                name: {self.node.name}
         """
         return s
-    
 
 
 class Node(graphene.ObjectType):

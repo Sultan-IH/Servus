@@ -28,8 +28,9 @@ class NewError(graphene.Mutation):
 
     def mutate(self, info, error_message, date, node_id):
         print(error_message, date, node_id)
-        error = Error(error_message=error_message, date=date, node_id=node_id)
         node = scraping_service.find_node(node_id)
+
+        error = Error(error_message=error_message, date=date, node=node)
 
         if node is None:
             return NewError(ok=False)
