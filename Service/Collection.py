@@ -7,11 +7,11 @@ class Resource(graphene.ObjectType):
     mined = graphene.NonNull(graphene.Int)
     name = graphene.NonNull(graphene.String)
 
-
 class Error(graphene.ObjectType):
     error_message = graphene.String()
     date = graphene.String()
-    node = Node
+    node_id = graphene.String()
+    node_name = graphene.String()
 
     def __str__(self):
         s = f"""
@@ -19,8 +19,8 @@ class Error(graphene.ObjectType):
             message: {self.error_message}
             date: {self.date}
             Node:
-                id: {self.node.id}
-                name: {self.node.name}
+                id: {self.node_id}
+                name: {self.node_name}
         """
         return s
 

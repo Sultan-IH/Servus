@@ -1,7 +1,7 @@
 from Service.Service import Node
 from Service.Collection import Error
+from Service import __service__
 import graphene
-from .service import scraping_service
 from .mailing import send_email
 
 
@@ -14,7 +14,7 @@ class NewNode(graphene.Mutation):
 
     def mutate(self, info, name):
         node = Node(name=name)
-        scraping_service.new_node(node)
+        __service__.new_node(node)
         return NewNode(ok=True, id=node.id)
 
 
@@ -27,10 +27,9 @@ class NewError(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, error_message, date, node_id):
-        print(error_message, date, node_id)
-        node = scraping_service.find_node(node_id)
+        node = __service__.find_node(node_id)
 
-        error = Error(error_message=error_message, date=date, node=node)
+        error = Error(error_message=error_message, date=date, node_id=node.id, node_name=node.name)
 
         if node is None:
             return NewError(ok=False)
@@ -49,12 +48,12 @@ class RemoveNode(graphene.Mutation):
     id = graphene.String()
 
     def mutate(self, info, id):
-        print("removing node with id: ", id)
-        scraping_service.remove_node(id)
+        __service__.remove_node(id)
         return RemoveNode(ok=True, id=id)
 
 
 class AddResources(graphene.Mutation):
+
     class Arguments:
         collection = graphene.String()
         new_resources = graphene.List(graphene.String)
@@ -62,7 +61,7 @@ class AddResources(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, new_resources, collection):
-        scraping_service.add_resources(collection, new_resources)
+        __service__.add_resources(collection, new_resources)
         return AddResources(ok=True)
 
 
@@ -74,7 +73,7 @@ class RemoveResources(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, old_resources, collection):
-        scraping_service.remove_resources(collection, old_resources)
+        __service__.remove_resources(collection, old_resources)
         return RemoveResources(ok=True)
 
 
