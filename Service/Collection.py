@@ -1,11 +1,13 @@
 import json
 import graphene
 import uuid
+import logging
 
 
 class Resource(graphene.ObjectType):
     mined = graphene.NonNull(graphene.Int)
     name = graphene.NonNull(graphene.String)
+
 
 class Error(graphene.ObjectType):
     error_message = graphene.String()
@@ -54,7 +56,7 @@ class Collection(graphene.ObjectType):
     def allocate_resources(self, n: int):  # always allocates n least mined resources
         resources = []
         if n > len(self.resources):
-            print("Node requested more than possible, capping at len.")
+            logging.info("Node requested more than possible, capping at len.")
             n = len(self.resources)
 
         for i in range(n):
@@ -65,7 +67,6 @@ class Collection(graphene.ObjectType):
         return resources
 
     def parse_json(self, s: str):
-        print(s, type(s))
         resources = json.loads(s)
         self.add_resources(resources)
 

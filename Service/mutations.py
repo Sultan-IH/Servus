@@ -1,8 +1,22 @@
-from Service.Service import Node
+from Service.Service import Node, Metrics
 from Service.Collection import Error
 from Service import __service__
 import graphene
-from .mailing import send_email
+from .mailing import send_error_report, send_metric_report
+
+
+class MetricsReport(graphene.Mutation):
+    class Arguments:
+        node_name = graphene.String()
+        report = graphene.String()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, node_name, report):
+        m = Metrics(node_name=node_name, report=report)
+        send_metric_report("ksula0155@gmail.com", "Scraping Metric report", m)
+        send_metric_report("vincnttan@gmail.com", "Scraping Metric report", m)
+        return MetricsReport(ok=True)
 
 
 class NewNode(graphene.Mutation):
@@ -35,8 +49,8 @@ class NewError(graphene.Mutation):
             return NewError(ok=False)
         else:
             node.add_error(error)
-            send_email("ksula0155@gmail.com", "Error in Scraping", error)
-            send_email("vincnttan@gmail.com", "Error in Scraping", error)
+            send_error_report("ksula0155@gmail.com", "Error in Scraping", error)
+            send_error_report("vincnttan@gmail.com", "Error in Scraping", error)
             return NewError(ok=True)
 
 
@@ -53,7 +67,6 @@ class RemoveNode(graphene.Mutation):
 
 
 class AddResources(graphene.Mutation):
-
     class Arguments:
         collection = graphene.String()
         new_resources = graphene.List(graphene.String)
@@ -83,3 +96,4 @@ class Mutations(graphene.ObjectType):
     remove_resources = RemoveResources.Field()
     remove_node = RemoveNode.Field()
     report_error = NewError.Field()
+    new_report = MetricsReport.Field()
