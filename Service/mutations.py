@@ -21,7 +21,7 @@ class MetricsReport(graphene.Mutation):
 
 class NewNode(graphene.Mutation):
     class Arguments:
-        name = graphene.String()
+        name = graphene.NonNull(graphene.String)
 
     ok = graphene.Boolean()
     id = graphene.String()

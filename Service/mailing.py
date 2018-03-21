@@ -9,7 +9,6 @@ USERNAME = os.getenv("EMAIL_USERNAME")
 PASSWORD = os.getenv("EMAIL_PASSWORD")
 FROMADDR = "reports@servus.io"
 
-
 if USERNAME is None or PASSWORD is None:
     logging.warning("INVALID USER NAME AND PASSWORD FOR EMAIL")
 
@@ -55,7 +54,7 @@ def send_metric_report(to_addr: str, subject: str, metrics):
         text = metrics.report
 
         with open("./Service/email_templates/metrics.html") as f:
-            html = f.read() % metrics.report
+            html = f.read().format(metrics.node_html(), metrics.report)
 
         # Record the MIME types of both parts - text/plain and text/html.
         part1 = MIMEText(text, 'plain')
