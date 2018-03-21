@@ -65,16 +65,5 @@ class Service(graphene.ObjectType):
 
 
 class Metrics(graphene.ObjectType):
-    node_name = graphene.NonNull(graphene.String)
+    node_id = graphene.NonNull(graphene.String)
     report = graphene.NonNull(graphene.String)
-    program_name = graphene.NonNull(graphene.String)
-    version = graphene.NonNull(graphene.String)
-
-    def node_html(self):
-        return f"""
-        <div>
-            <p>program name: {self.program_name} </p>
-            <p>verison: {self.version} </p>
-            <p>node: {self.node_name}</p>
-        </div>
-        """

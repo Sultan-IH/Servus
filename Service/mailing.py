@@ -29,20 +29,21 @@ class MailServer:
         self.server.quit()
 
 
-def send_error_report(to_addr: str, subject: str, error: Error):
+def send_error_report(to_addr: str, subject: str, error: Error, node):
     with MailServer() as server:
         msg = "\r\n".join([
             "From: " + FROMADDR,
             "To: " + to_addr,
             "Subject: " + subject,
             "",
-            str(error)
+            str(error),
+            node.node_html()
         ])
         logging.info("Sending error report: %s", msg)
         server.sendmail(FROMADDR, to_addr, msg)
 
 
-def send_metric_report(to_addr: str, subject: str, metrics):
+def send_metric_report(to_addr: str, subject: str, metrics, node):
     with MailServer() as server:
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
@@ -54,7 +55,7 @@ def send_metric_report(to_addr: str, subject: str, metrics):
         text = metrics.report
 
         with open("./Service/email_templates/metrics.html") as f:
-            html = f.read().format(metrics.node_html(), metrics.report)
+            html = f.read().format(node.node_html(), metrics.report)
 
         # Record the MIME types of both parts - text/plain and text/html.
         part1 = MIMEText(text, 'plain')

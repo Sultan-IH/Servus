@@ -7,27 +7,30 @@ from .mailing import send_error_report, send_metric_report
 
 class MetricsReport(graphene.Mutation):
     class Arguments:
-        node_name = graphene.String()
+        node_id = graphene.String()
         report = graphene.String()
 
     ok = graphene.Boolean()
 
-    def mutate(self, info, node_name, report):
-        m = Metrics(node_name=node_name, report=report)
-        send_metric_report("ksula0155@gmail.com", "Scraping Metric report", m)
-        send_metric_report("vincnttan@gmail.com", "Scraping Metric report", m)
+    def mutate(self, info, node_id, report):
+        m = Metrics(node_id=node_id, report=report)
+        node = __service__.find_node(node_id)
+        send_metric_report("ksula0155@gmail.com", "Scraping Metric report", m, node)
+        send_metric_report("vincnttan@gmail.com", "Scraping Metric report", m, node)
         return MetricsReport(ok=True)
 
 
 class NewNode(graphene.Mutation):
     class Arguments:
-        name = graphene.NonNull(graphene.String)
+        node_name = graphene.NonNull(graphene.String)
+        program_name = graphene.NonNull(graphene.String)
+        version = graphene.NonNull(graphene.String)
 
     ok = graphene.Boolean()
     id = graphene.String()
 
-    def mutate(self, info, name):
-        node = Node(name=name)
+    def mutate(self, info, node_name, program_name, version):
+        node = Node(node_name=node_name, program_name=program_name, version=version)
         __service__.new_node(node)
         return NewNode(ok=True, id=node.id)
 
@@ -49,8 +52,8 @@ class NewError(graphene.Mutation):
             return NewError(ok=False)
         else:
             node.add_error(error)
-            send_error_report("ksula0155@gmail.com", "Error in Scraping", error)
-            send_error_report("vincnttan@gmail.com", "Error in Scraping", error)
+            send_error_report("ksula0155@gmail.com", "Error in Scraping", error, node)
+            send_error_report("vincnttan@gmail.com", "Error in Scraping", error, node)
             return NewError(ok=True)
 
 

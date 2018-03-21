@@ -28,18 +28,31 @@ class Error(graphene.ObjectType):
 
 
 class Node(graphene.ObjectType):
-    name = graphene.NonNull(graphene.String)
+    node_name = graphene.NonNull(graphene.String)
     mining = graphene.List(Resource)
     id = graphene.String()
     errors = graphene.List(Error)
+    program_name = graphene.NonNull(graphene.String)
+    version = graphene.NonNull(graphene.String)
 
-    def __init__(self, name, _id=None, mining=[], errors=[]):
+    def __init__(self, node_name, program_name, version, _id=None, mining=[], errors=[]):
         if _id is None:
             _id = uuid.uuid4().hex
-        super().__init__(name=name, id=_id, mining=mining, errors=errors)
+        super().__init__(node_name=node_name, id=_id, mining=mining, errors=errors, program_name=program_name,
+                         verison=version)
 
-    def add_error(self, error: Error):
-        self.errors.append(error)
+    def node_html(self):
+        return f"""
+        <div>
+            <p>program name: {self.program_name} </p>
+            <p>verison: {self.version} </p>
+            <p>node: {self.node_name}</p>
+        </div>
+        """
+
+
+def add_error(self, error: Error):
+    self.errors.append(error)
 
 
 class Collection(graphene.ObjectType):
