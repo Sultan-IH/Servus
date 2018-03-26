@@ -39,7 +39,7 @@ class Node(graphene.ObjectType):
         if _id is None:
             _id = uuid.uuid4().hex
         super().__init__(node_name=node_name, id=_id, mining=mining, errors=errors, program_name=program_name,
-                         verison=version)
+                         version=version)
 
     def node_html(self):
         return f"""

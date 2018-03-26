@@ -3,7 +3,7 @@ from Service.Collection import Error
 from Service import __service__
 import graphene
 from .mailing import send_error_report, send_metric_report
-
+import logging
 
 class MetricsReport(graphene.Mutation):
     class Arguments:
@@ -13,6 +13,7 @@ class MetricsReport(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, node_id, report):
+        logging.info("got a new metrics report from [%s]; report: [%s] ", node_id, report)
         m = Metrics(node_id=node_id, report=report)
         node = __service__.find_node(node_id)
         send_metric_report("ksula0155@gmail.com", "Scraping Metric report", m, node)
@@ -30,6 +31,7 @@ class NewNode(graphene.Mutation):
     id = graphene.String()
 
     def mutate(self, info, node_name, program_name, version):
+        logging.info("got a new node request with name: [%s];", node_name)
         node = Node(node_name=node_name, program_name=program_name, version=version)
         __service__.new_node(node)
         return NewNode(ok=True, id=node.id)
@@ -45,8 +47,8 @@ class NewError(graphene.Mutation):
 
     def mutate(self, info, error_message, date, node_id):
         node = __service__.find_node(node_id)
-
-        error = Error(error_message=error_message, date=date, node_id=node.id, node_name=node.name)
+        logging.info("got a new error report from [%s]; report: [%s] ", node_id, error_messages)
+        error = Error(error_message=error_message, date=date, node_id=node.id, node_name=node.node_name)
 
         if node is None:
             return NewError(ok=False)
