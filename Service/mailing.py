@@ -26,6 +26,7 @@ class MailServer:
         return server
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        logging.info(exc_val, exc_type)
         self.server.quit()
 
 

@@ -19,7 +19,7 @@ class RootQuery(graphene.ObjectType):
         collection = kwargs.get('collection')
         logging.info("Got a getResources GraphQL query, id: %s, n: %d, collection: %s", id, n, collection)
 
-        resources = __service__.alloc_resources(id=id, resource=collection, n=n)
+        resources = __service__.alloc_resources(id=id, collection=collection, n=n)
         return resources
 
     def resolve_read_resources(self, info, **kwargs):

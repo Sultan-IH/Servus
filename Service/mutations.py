@@ -5,6 +5,7 @@ import graphene
 from .mailing import send_error_report, send_metric_report
 import logging
 
+
 class MetricsReport(graphene.Mutation):
     class Arguments:
         node_id = graphene.String()

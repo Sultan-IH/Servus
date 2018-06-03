@@ -8,6 +8,7 @@ import Service.storage as storage
 class Service(graphene.ObjectType):
     name = graphene.NonNull(graphene.String)
     collections = graphene.List(Collection)
+    # this is for keeping track of properly registered nodes
     node_registry = graphene.List(Node)
 
     def __init__(self, name, collections=[], node_registry=[]):
@@ -33,21 +34,23 @@ class Service(graphene.ObjectType):
         collection = next((x for x in self.collections if x.name == name), None)
         return collection
 
-    def alloc_resources(self, id: str, resource: str, n: int):
-        res = self.find_collection(resource)
+    def alloc_resources(self, id: str, collection: str, n: int):
+        coll = self.find_collection(collection)
+        resources = coll.allocate_resources(id, n)
         node = self.find_node(id)
         if node is None:
             logging.warning("Node" + id + "hasn't been registered with a proper request")
             return []
-        resources = res.allocate_resources(n)
         return resources
 
-    def find_node(self, id):
-        node = next((x for x in self.node_registry if x.id == id), None)
+    def find_node(self, _id) -> Node:
+        node = next((x for x in self.node_registry if x.id == _id), None)
         return node
 
     def remove_node(self, _id):
+        for coll in self.collections: coll.remove_node(_id)
         self.node_registry = [node for node in self.node_registry if node.id != _id]
+
 
     def save(self):
         storage.save(self.db_path, self.collections)

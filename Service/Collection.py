@@ -45,28 +45,33 @@ class Node(graphene.ObjectType):
         return f"""
         <div>
             <p>program name: {self.program_name} </p>
-            <p>verison: {self.version} </p>
+            <p>version: {self.version} </p>
             <p>node: {self.node_name}</p>
         </div>
         """
 
-
-def add_error(self, error: Error):
-    self.errors.append(error)
+    def add_error(self, error: Error):
+        self.errors.append(error)
 
 
 class Collection(graphene.ObjectType):
     name = graphene.String()
     resources = graphene.List(Resource)
+    node_registry = {}
 
-    def remove_node(self, resources):
-        for resource in resources:
-            if resource in self.resources:
-                resource.mined -= 1
+    def remove_node(self, _id):
+        if self.node_registry[_id] is None:
+            return None
+        unwated_resources = self.node_registry[_id]
 
+        def decrement(x):
+            x.mined -= 1
+            return x
+
+        self.resources = [decrement(resource) for resource in self.resources if resource in unwated_resources]
         self.resources.sort(key=lambda x: x.mined)
 
-    def allocate_resources(self, n: int):  # always allocates n least mined resources
+    def allocate_resources(self, id: str, n: int):  # always allocates n least mined resources
         resources = []
         if n > len(self.resources):
             logging.info("Node requested more than possible, capping at len.")
@@ -76,6 +81,7 @@ class Collection(graphene.ObjectType):
             resources.append(self.resources[i])
             self.resources[i].mined += 1
 
+        self.node_registry[id] = resources
         self.resources.sort(key=lambda x: x.mined)
         return resources
 
