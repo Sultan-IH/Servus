@@ -65,10 +65,11 @@ class Collection(graphene.ObjectType):
         unwated_resources = self.node_registry[_id]
 
         def decrement(x):
-            x.mined -= 1
+            if x in unwated_resources:
+                x.mined -= 1
             return x
 
-        self.resources = [decrement(resource) for resource in self.resources if resource in unwated_resources]
+        self.resources = [decrement(resource) for resource in self.resources]
         self.resources.sort(key=lambda x: x.mined)
 
     def allocate_resources(self, id: str, n: int):  # always allocates n least mined resources

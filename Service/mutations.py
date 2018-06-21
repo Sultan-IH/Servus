@@ -48,7 +48,7 @@ class NewError(graphene.Mutation):
 
     def mutate(self, info, error_message, date, node_id):
         node = __service__.find_node(node_id)
-        logging.info("got a new error report from [%s]; report: [%s] ", node_id, error_messages)
+        logging.info("got a new error report from [%s]; report: [%s] ", node_id, error_message)
         error = Error(error_message=error_message, date=date, node_id=node.id, node_name=node.node_name)
 
         if node is None:
